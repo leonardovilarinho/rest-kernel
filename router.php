@@ -3,7 +3,7 @@
 	{
 		protected $params = [];
 		
-		public function resolverUrl($_url, $_callback)
+		private function resolverUrl($_url, $_callback)
 		{
 			if(  strstr( $_url, ":" ) )
 			{
