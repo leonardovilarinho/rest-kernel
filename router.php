@@ -17,7 +17,7 @@
 
 				if( $totalParams == $totalRequest )
 				{
-					for( $x=1; $x<$totalParams; $x++ )if(  strstr($url[$x],":") )$this->params[substr($url[$x], 1)] = $request[$x];
+					for( $x=1; $x<$totalParams; $x++ )if(  strstr($url[$x],":") )$this->params[substr($url[$x], 1)] = urldecode($request[$x]);
 					call_user_func($_callback, $this->params);
 				}
 			}
