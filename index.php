@@ -25,8 +25,8 @@
 		echo "SALVAR USUÁRIO: ".$params["nome"];
 	});	
 	
-	$Router->put("/usuarios/:nome", function($params){
-		echo "SALVAR USUÁRIO: ".$params["nome"];
+	$Router->put("/usuarios/:id/:nome", function($params){
+		echo "ATUALIZAR USUÁRIO: ".$params["nome"]." COM ID: ".$params["id"];
 	});
 	
 	$Router->delete("/usuarios/:id", function($params){
