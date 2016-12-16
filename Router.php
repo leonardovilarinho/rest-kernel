@@ -13,11 +13,13 @@ class Router
      * o callback, sendo um array com os valores dos parametros da rota
      * @param $_url - rota
      * @param $_callback - função para retorno
+     * @return null - caso não encontre nada
      */
     private function translateURL($_url, $_callback)
     {
         $params = array();
-        $folder = '/'.end( explode('/', __DIR__) );
+        $dir = explode('/', __DIR__);
+        $folder = '/'.end( $dir );
 
         if( stripos($_url, ':') !== false ) {
 
@@ -43,6 +45,7 @@ class Router
         }
         else if( $_SERVER ['REQUEST_URI'] == $folder.$_url )
             call_user_func($_callback);
+        return null;
     }
 
     /**
