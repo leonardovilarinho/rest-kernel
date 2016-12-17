@@ -1,0 +1,21 @@
+{
+    "name": "legionlab/rest-kernel",
+    "description": "RestAPI LegionLab",
+    "require": {
+        "php" : ">=5.4",
+        "legionlab/utils": "^1.1",
+        "respect/validation": "^1.1"
+    },
+    "license": "MITS",
+    "authors": [
+        {
+            "name": "Leonardo Vilarinho",
+            "email": "leonardo-i@outlook.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "LegionLab\\Rest\\" : ""
+        }
+    }
+}
