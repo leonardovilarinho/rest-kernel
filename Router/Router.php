@@ -1,6 +1,6 @@
 <?php
 
-namespace RestPHP\Router;
+namespace LegionLab\Rest\Router;
 
 /**
  * Class Router
