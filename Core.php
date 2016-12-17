@@ -35,10 +35,19 @@ class Core extends Router
 
     private function importKernelUtil()
     {
-        require_once ROOT."settings/setups.php";
+        require_once ROOT."setups.php";
 
-        if(Settings::get('deployment'))
-            require_once ROOT."settings/database.php";
+        if(Settings::get('deployment')) {
+            $directoryName = ROOT.'migration/';
+            if(is_dir($directoryName)):
+                $directory = dir($directoryName);
+                while (($archive = $directory->read()) !== false)
+                    if(stripos($archive, '.php'))
+                        require $directoryName.$archive;
+
+                $directory->close();
+            endif;
+        }
     }
 
 }

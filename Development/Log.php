@@ -15,11 +15,6 @@ use LegionLab\Rest\Collections\Settings;
 
 class Log
 {
-    /**
-     * Atributos privados
-     * @var string - diretório onde se armazenará arquivos de log
-     */
-    private static $dir = '/logs/';
 
     /**
      * Registra um novo log, o log padrao é mysql_errors, onde são salvos os erros do banco de dados
@@ -31,13 +26,15 @@ class Log
      */
     public static function register($msg, $archive = 'mysql_errors')
     {
+        echo ROOT . $archive;
         if(Settings::get('logs')) {
             $date = date('Y-m-d H:i:s');
-            if(file_exists(self::$dir . $archive)) {
+            echo ROOT . $archive;
+            if(file_exists(ROOT . $archive)) {
                 $msg = "________________________________________________________\n" .
                     "___" . $date . " by " . $_SERVER['REMOTE_ADDR'] . "\n" .
                     $msg . "\n";
-                file_put_contents(self::$dir . $archive, $msg, FILE_APPEND);
+                file_put_contents(ROOT. $archive, $msg, FILE_APPEND);
             }
         }
     }

@@ -2,49 +2,61 @@
 
 namespace LegionLab\Rest\Router;
 
+use LegionLab\Rest\Collections\Settings;
+
 /**
  * Class Router
  * @package RestPHP\Router
  */
 class Router
 {
+
     /**
      * Traduz uma rota, verifica se ela possui atributos e validadores, então pega tudo e envia em forma de array para
      * o callback, sendo um array com os valores dos parametros da rota
      * @param $_url - rota
      * @param $_callback - função para retorno
+     * @param $attrs - atributos da url
      * @return null - caso não encontre nada
      */
-    private function translateURL($_url, $_callback)
+    private function translateURL($_url, $_callback, $attrs = null)
     {
         $params = array();
-        $dir = explode('/', __DIR__);
-        $folder = '/'.end( $dir );
 
-        if( stripos($_url, ':') !== false ) {
+        if( strpos($_SERVER ['REQUEST_URI'], str_replace($_SERVER['HTTP_HOST'], '', Settings::get('api_url').$_url))  !== false) {
+            if(!is_null($attrs)) {
+                $values = $this->handlingURL($_url);
 
-            $data = $this->handlingURL($_url);
+                if( count($attrs) == count($values) ) {
+                    $count = 0;
+                    foreach ($attrs as $key => $value) {
+                        $result = $this->validateATTR( $value, $values[$count] );
 
-            if( count($data['url']) == count($data['attr']) ) {
-                foreach ($data['url'] as $key => $value) {
-                    if( stripos($value, ':') !== false ) {
-                        if( stripos($value, '|') !== false ) {
-                            $result = $this->validateATTR( explode('|', $value)[1], urldecode($data['attr'][$key]) );
-
-                            if(is_null($result))
-                                return null;
-                            else
-                                $params[substr(explode('|', $value)[0], 1)] = $result;
-                        }
+                        if(is_null($result))
+                            return null;
                         else
-                            $params[substr($value, 1)] = urldecode($data['attr'][$key]);
+                            $params[$key] = $result;
+                        $count ++;
                     }
+                    call_user_func($_callback, $params);
                 }
-                call_user_func($_callback, $params);
+            } else {
+
+                if ($_SERVER ['REQUEST_URI'] === str_replace($_SERVER['HTTP_HOST'], '', Settings::get('api_url').$_url)) {
+                    global $_PUT, $_DELETE;
+
+                    if(count($_POST) == 0 and $_SERVER['REQUEST_METHOD'] == 'POST')
+                        call_user_func($_callback);
+                    if(count($_PUT) == 0 and $_SERVER['REQUEST_METHOD'] == 'PUT')
+                        call_user_func($_callback);
+                    if(count($_DELETE) == 0 and $_SERVER['REQUEST_METHOD'] == 'DELETE')
+                        call_user_func($_callback);
+                    if(count($_GET) == 0 and $_SERVER['REQUEST_METHOD'] == 'GET')
+                        call_user_func($_callback);
+                }
+
             }
         }
-        else if( $_SERVER ['REQUEST_URI'] == $folder.$_url )
-            call_user_func($_callback);
         return null;
     }
 
@@ -52,7 +64,7 @@ class Router
      * Valida um tipo de parametro da URL
      * @param $validator - o tipo do parametro indicado na rota
      * @param $attr - valor dado na URL
-     * @return null|mixed - null para nao encontrado ou valor enncontrado
+     * @return null@mixed - null para nao encontrado ou valor enncontrado
      */
     private function validateATTR($validator, $attr)
     {
@@ -93,19 +105,42 @@ class Router
 
     /**
      * Manipula a URL, transformando-a em um array de valores da rota e seus determinados valores
-     * @param $_url - rota
+     * @param $route - rota
      * @return array - url: array com indeces da rota, atttr: valores dos indices na url
      */
-    private function handlingURL($_url)
+    private function handlingURL($route)
     {
-        $url = explode('/', $_url);
-        $attr = explode("/", $_SERVER ['REQUEST_URI']);
+        $values = array();
 
-        $url = array_filter( $url, function($v) { return !($v == ''); } );
-        $attr = array_filter( $attr, function($v) { return !($v == ''); } );
-        unset($attr[1]);
+        switch ($_SERVER['REQUEST_METHOD']) {
+            case 'GET':
+                $values = explode('/', $_SERVER ['REQUEST_URI']);
+            break;
+            case 'POST':
+                $values = $_POST;
+            break;
+            case 'PUT':
+                global $_PUT;
+                parse_str(file_get_contents("php://input"), $_PUT);
+                $values = $_PUT;
+            break;
+            case 'DELETE':
+                global $_DELETE;
+                parse_str(file_get_contents("php://input"), $_DELETE);
+                $values = $_DELETE;
+            break;
+            default:
+                $attr = null;
+        }
 
-        return array( 'url' => array_values($url), 'attr' => array_values($attr) );
+        foreach ($values as $key => $value) {
+            if(!empty($value))
+                if( strpos(Settings::get('api_url'), $value) !== false or  strpos($route, $value) !== false )
+                    unset($values[$key]);
+        }
+
+        $values = array_filter( $values, function($v) { return !($v == ''); } );
+        return array_values($values);
     }
 
     /**
@@ -113,10 +148,10 @@ class Router
      * @param $_url - rota
      * @param $_callback - função para retorno
      */
-    public function get($_url, $_callback)
+    public function get($_url, $_callback, $attrs = null)
     {
         if( $_SERVER['REQUEST_METHOD'] == "GET" )
-            $this->translateURL($_url, $_callback);
+            $this->translateURL($_url, $_callback, $attrs);
     }
 
     /**
@@ -124,21 +159,22 @@ class Router
      * @param $_url - rota
      * @param $_callback - função para retorno
      */
-    public function post($_url, $_callback)
+    public function post($_url, $_callback, $attrs = null)
     {
         if( $_SERVER['REQUEST_METHOD'] == "POST" )
-            $this->translateURL($_url, $_callback);
+            $this->translateURL($_url, $_callback, $attrs);
     }
 
     /**
      * Manipula uma rota com método PUT
      * @param $_url - rota
      * @param $_callback - função para retorno
+     * @param $attrs - atributos que recebemos
      */
-    public function put($_url, $_callback)
+    public function put($_url, $_callback, $attrs = null)
     {
         if( $_SERVER['REQUEST_METHOD'] == "PUT" )
-            $this->translateURL($_url, $_callback);
+            $this->translateURL($_url, $_callback, $attrs);
     }
 
     /**
@@ -146,10 +182,10 @@ class Router
      * @param $_url - rota
      * @param $_callback - função para retorno
      */
-    public function delete($_url, $_callback)
+    public function delete($_url, $_callback, $attrs = null )
     {
         if( $_SERVER['REQUEST_METHOD'] == "DELETE" )
-            $this->translateURL($_url, $_callback);
+            $this->translateURL($_url, $_callback, $attrs);
     }
 }
 

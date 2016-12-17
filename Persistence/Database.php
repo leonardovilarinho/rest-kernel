@@ -99,7 +99,6 @@ abstract class Database
                 if($this instanceof Database)
                     $this->$set($this->last() + 1);
 
-
                 return $this->close($prepare);
 
             } catch(\Exception $e) {
@@ -357,7 +356,7 @@ abstract class Database
     private function clear()
     {
         $attr = get_class_vars(get_class($this));
-        $attr2 = get_class_vars('\\LegionLab\\Troubadour\\Persistence\\Database');
+        $attr2 = get_class_vars('\\LegionLab\\Rest\\Persistence\\Database');
 
 
         foreach ($attr as $key => $value)

@@ -14,7 +14,6 @@ class Object extends Database
     public function __construct($table, $pk = "id", $database = null)
     {
         parent::__construct($table, $pk, $database);
-
     }
 
     public function className()

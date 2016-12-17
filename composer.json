@@ -15,7 +15,11 @@
     ],
     "autoload" : {
         "psr-4" : {
-            "LegionLab\\Rest\\" : ""
+            "LegionLab\\Rest\\" : "",
+            "LegionLab\\Rest\\Collections\\" : "Collections",
+            "LegionLab\\Rest\\Development\\" : "Development",
+            "LegionLab\\Rest\\Persistence\\" : "Persistence",
+            "LegionLab\\Rest\\Router\\" : "Router"
         }
     }
 }
